@@ -1,7 +1,8 @@
 import pytest
-from django.urls import reverse
-from datetime import datetime, timedelta
 
+from datetime import datetime, timedelta
+from django.test import Client
+from django.urls import reverse
 from django.conf import settings
 from django.utils import timezone
 
@@ -15,8 +16,9 @@ def author(django_user_model):
 
 
 @pytest.fixture
-def author_client(client, author):
+def author_client(author):
     """Фикстура логина автора комментария."""
+    client = Client()
     client.force_login(author)
     return client
 
@@ -64,14 +66,14 @@ def many_news():
 def comments_with_other_dates(news, author):
     """Фикстура создания комментариев с разными датами."""
     now = timezone.now()
-    for i in range(1, 3):
+    for i in range(1, 11):
         comment = Comment.objects.create(
             news=news,
             author=author,
-            text=f'Текст к комментарию № {i}?',
+            text=f'Текст к комментарию № {i}',
         )
-    comment.created = now + timedelta(days=i)
-    comment.save()
+        comment.created = now + timedelta(days=i)
+        comment.save()
 
 
 @pytest.fixture
