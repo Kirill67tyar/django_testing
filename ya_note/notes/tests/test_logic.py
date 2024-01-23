@@ -16,10 +16,10 @@ class TestLogic(TestCase):
 
     NOTE_TITLE = 'Заметка № 1'
     NOTE_TEXT = 'Текст к заметке'
+    NOTE_SLUG = 'zametka-1'
 
     @classmethod
     def setUpTestData(cls):
-        cls.NOTE_SLUG = slugify(cls.NOTE_TITLE)
         cls.author = User.objects.create(username='Кама Пуля')
         cls.reader = User.objects.create(username='Мага Лезгин')
         cls.note = Note.objects.create(
