@@ -19,11 +19,13 @@ class TestLogic(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.NOTE_SLUG = slugify(cls.NOTE_TITLE)
         cls.author = User.objects.create(username='Кама Пуля')
         cls.reader = User.objects.create(username='Мага Лезгин')
         cls.note = Note.objects.create(
             title=cls.NOTE_TITLE,
             text=cls.NOTE_TEXT,
+            slug=cls.NOTE_SLUG,
             author=cls.author,
         )
         cls.form_data = {
@@ -95,8 +97,8 @@ class TestLogic(TestCase):
         note = Note.objects.order_by('pk').last()
         expexted_slug = slugify(note.title)
         self.assertRedirects(response, self.success_url)
-        assert Note.objects.count() == 1
-        assert note.slug == expexted_slug
+        self.assertEqual(Note.objects.count(), 1)
+        self.assertEqual(note.slug, expexted_slug)
 
     def test_author_can_edit_note(self):
         """Тест успешного обновления заметки её автором."""
@@ -113,16 +115,17 @@ class TestLogic(TestCase):
             self.edit_url, data=self.form_data).status_code
         self.note.refresh_from_db()
         self.assertEqual(status_code, HTTPStatus.NOT_FOUND)
-        self.assertNotEqual(self.note.title, self.form_data['title'])
-        self.assertNotEqual(self.note.text, self.form_data['text'])
-        self.assertNotEqual(self.note.slug, self.form_data['slug'])
+        self.assertEqual(self.note.title, self.NOTE_TITLE)
+        self.assertEqual(self.note.text, self.NOTE_TEXT)
+        self.assertEqual(self.note.slug, self.NOTE_SLUG)
+        self.assertEqual(self.note.author, self.author)
 
     def test_author_can_delete_note(self):
         """Тест, что автор может удалить свою заметку."""
         quantity_notes = Note.objects.count() - 1
         response = self.client_author.post(self.delete_url)
         self.assertRedirects(response, self.success_url)
-        assert Note.objects.count() == quantity_notes
+        self.assertEqual(Note.objects.count(), quantity_notes)
 
     def test_other_user_cant_delete_note(self):
         """Тест, что не автор заметки не может её удалить."""
